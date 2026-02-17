@@ -10,7 +10,7 @@ jobs:
           terraform_version: 1.6.6
       - name: fmt
         run: terraform -chdir=infra fmt -check -recursive
-      - name: init
-        run: terraform -chdir=infra init
       - name: validate
-        run: terraform -chdir=infra validate
+        run: |
+          terraform -chdir=infra init -backend=false
+          terraform -chdir=infra validate
