@@ -1,10 +1,24 @@
-output "cluster_name" { value = module.eks.cluster_name }
-output "cluster_region" { value = var.aws_region }
+output "cluster_name" {
+  value       = module.eks.cluster_name
+  description = "EKS cluster name"
+}
 
-output "otel_irsa_role_arn" { value = module.eks.otel_irsa_role_arn }
-output "fluentbit_irsa_role_arn" { value = module.eks.fluentbit_irsa_role_arn }
+output "cluster_region" {
+  value       = var.aws_region
+  description = "AWS region"
+}
 
-output "api_ecr_repo_url" { value = module.ecr.api_repo_url }
+output "api_ecr_repo_url" {
+  value       = module.ecr.repository_url
+  description = "ECR repository URL for API"
+}
 
-output "opensearch_endpoint" { value = module.opensearch.endpoint }
-output "sns_topic_arn" { value = module.alerts.sns_topic_arn }
+output "opensearch_endpoint" {
+  value       = module.opensearch.endpoint
+  description = "OpenSearch domain endpoint"
+}
+
+output "vpc_id" {
+  value       = module.network.vpc_id
+  description = "VPC ID"
+}
