@@ -65,3 +65,5 @@ logs/
 .cache/
 infra/.terraform/
 infra/.terraform/
+infra/.terraform/
+.terraform.lock.hcl
