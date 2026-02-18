@@ -1,4 +1,5 @@
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 resource "aws_security_group" "cluster" {
   name        = "${var.name}-eks-cluster-sg"
@@ -34,20 +35,21 @@ resource "aws_cloudwatch_log_group" "control_plane" {
 resource "aws_eks_cluster" "this" {
   name     = "${var.name}-eks"
   role_arn = aws_iam_role.cluster.arn
-  version  = "1.29"
+  version  = var.eks_version
 
   vpc_config {
     subnet_ids              = concat(var.private_subnet_ids, var.public_subnet_ids)
     security_group_ids      = [aws_security_group.cluster.id]
-    endpoint_public_access  = true
-    endpoint_private_access = false
+    endpoint_public_access  = var.endpoint_public_access
+    endpoint_private_access = true
+    public_access_cidrs     = var.public_access_cidrs
   }
 
   enabled_cluster_log_types = ["api", "audit", "authenticator"]
 
   depends_on = [
     aws_iam_role_policy_attachment.cluster_policy,
-    aws_cloudwatch_log_group.control_plane
+    aws_cloudwatch_log_group.control_plane,
   ]
 
   tags = var.tags
@@ -66,17 +68,14 @@ resource "aws_iam_role" "node" {
   tags = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "node_worker" {
+resource "aws_iam_role_policy_attachment" "node_policies" {
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+  ])
   role       = aws_iam_role.node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-resource "aws_iam_role_policy_attachment" "node_cni" {
-  role       = aws_iam_role.node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-resource "aws_iam_role_policy_attachment" "node_ecr" {
-  role       = aws_iam_role.node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  policy_arn = each.value
 }
 
 resource "aws_eks_node_group" "default" {
@@ -86,21 +85,20 @@ resource "aws_eks_node_group" "default" {
   subnet_ids      = var.private_subnet_ids
 
   scaling_config {
-    desired_size = 2
-    max_size     = 4
-    min_size     = 2
+    desired_size = var.node_desired_size
+    max_size     = var.node_max_size
+    min_size     = var.node_min_size
   }
 
-  instance_types = ["t3.medium"]
+  instance_types = var.node_instance_types
   capacity_type  = "ON_DEMAND"
 
-  depends_on = [
-    aws_iam_role_policy_attachment.node_worker,
-    aws_iam_role_policy_attachment.node_cni,
-    aws_iam_role_policy_attachment.node_ecr
-  ]
+  update_config {
+    max_unavailable_percentage = 25
+  }
 
-  tags = var.tags
+  depends_on = [aws_iam_role_policy_attachment.node_policies]
+  tags       = var.tags
 }
 
 data "tls_certificate" "oidc" {
@@ -117,16 +115,32 @@ resource "aws_iam_openid_connect_provider" "oidc" {
 locals {
   oidc_provider_arn = aws_iam_openid_connect_provider.oidc.arn
   oidc_url_no_https = replace(aws_iam_openid_connect_provider.oidc.url, "https://", "")
+  account_id        = data.aws_caller_identity.current.account_id
+  region            = data.aws_region.current.name
 }
 
+# --- OTel IRSA ---------------------------------------------------------------
 resource "aws_iam_policy" "otel" {
   name        = "${var.name}-otel-policy"
-  description = "Allow OTEL collector to write traces/metrics"
+  description = "Scoped OTel permissions"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      { Effect = "Allow", Action = ["xray:PutTraceSegments", "xray:PutTelemetryRecords"], Resource = "*" },
-      { Effect = "Allow", Action = ["cloudwatch:PutMetricData"], Resource = "*" }
+      {
+        Effect   = "Allow"
+        Action   = ["xray:PutTraceSegments", "xray:PutTelemetryRecords"]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["cloudwatch:PutMetricData"]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "cloudwatch:namespace" = "EnterpriseObservability"
+          }
+        }
+      }
     ]
   })
 }
@@ -155,18 +169,34 @@ resource "aws_iam_role_policy_attachment" "otel_attach" {
   policy_arn = aws_iam_policy.otel.arn
 }
 
+# --- FluentBit IRSA ----------------------------------------------------------
 resource "aws_iam_policy" "fluentbit" {
   name        = "${var.name}-fluentbit-policy"
-  description = "Allow Fluent Bit to write logs to CloudWatch Logs"
+  description = "Scoped FluentBit permissions"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
         Action = [
-          "logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams", "logs:PutRetentionPolicy"
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams",
         ]
-        Resource = "*"
+        Resource = [
+          "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/eks/${var.name}/*",
+          "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/containerinsights/*",
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:PutRetentionPolicy",
+        ]
+        Resource = [
+          "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/eks/${var.name}/*",
+        ]
       }
     ]
   })

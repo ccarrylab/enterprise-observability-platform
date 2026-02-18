@@ -1,0 +1,16 @@
+kubeProxyReplacement: true
+bpf:
+  masquerade: true
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+bandwidthManager:
+  enabled: true
+encryption:
+  enabled: true
+  type: wireguard
+prometheus:
+  enabled: true

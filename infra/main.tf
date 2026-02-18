@@ -1,8 +1,11 @@
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 locals {
   tags = merge(var.tags, {
-    Project = var.name
+    Project     = var.name
+    ManagedBy   = "terraform"
+    Environment = terraform.workspace
   })
 }
 
