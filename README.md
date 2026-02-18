@@ -39,7 +39,8 @@ This platform provides a comprehensive, production-ready observability stack on 
 
 ## Architecture
 
-![Enterprise Observability Platform Architecture](docs/images/architecture-v2.png)
+
+<img width="1799" height="2207" alt="IMG_1315" src="https://github.com/user-attachments/assets/06724f15-e635-4c54-9ca0-d83e65691a81" />
 
 ### Data Flow Architecture
 
