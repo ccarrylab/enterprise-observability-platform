@@ -17,7 +17,8 @@
 
 ## Architecture
 
-![Architecture](IMG_1300.jpeg)
+![IMG_1300](https://github.com/user-attachments/assets/2c8e1baa-9dc2-4ac2-aa76-22d668ecf521)
+
 
 ## Quick Start (5min)
 
