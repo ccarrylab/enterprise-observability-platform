@@ -94,4 +94,4 @@ More @ccarrylab
 MIT License
 Suggestions via Issues welcome.
 
-Built by Cohen H. Carryl | Adobe Sr Cloud Engineer | 3x AWS | Chaos Engineering Creator
+Built by Cohen H. Carryl | Sr Cloud Engineer | 3x AWS | Chaos Engineering Creator
