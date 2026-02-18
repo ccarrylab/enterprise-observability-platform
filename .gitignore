@@ -64,3 +64,4 @@ logs/
 *.temp
 .cache/
 infra/.terraform/
+infra/.terraform/
