@@ -1,3 +1,6 @@
+#!/bin/bash
+
+cat > README.md << 'EOF'
 # Enterprise Observability Platform on AWS *** (Work in Progress) ***
 
 [![Terraform](https://img.shields.io/badge/Terraform-1.6+-623CE4?logo=terraform&logoColor=white)](https://www.terraform.io/)
