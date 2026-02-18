@@ -40,7 +40,7 @@ This platform provides a comprehensive, production-ready observability stack on 
 ## Architecture
 
 
-<img width="1888" height="3247" alt="enterprise_observability_platform_dark_aligned" src="https://github.com/user-attachments/assets/d273c796-387d-4219-8b6b-24928048e886" />
+<img width="1888" height="3247" alt="enterprise_observability_platform_light_aligned" src="https://github.com/user-attachments/assets/29e3635c-5084-4474-94d6-3f952ad11b29" />
 
 
 
