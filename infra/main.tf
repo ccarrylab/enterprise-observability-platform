@@ -21,6 +21,7 @@ module "eks" {
   vpc_id             = module.network.vpc_id
   private_subnet_ids = module.network.private_subnet_ids
   public_subnet_ids  = module.network.public_subnet_ids
+  account_id         = data.aws_caller_identity.current.account_id
   tags               = local.tags
 }
 

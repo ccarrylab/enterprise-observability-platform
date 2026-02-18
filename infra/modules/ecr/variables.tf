@@ -1,10 +1,14 @@
 variable "name" {
   type        = string
-  description = "Name prefix for ECR repository"
+  description = "Module name prefix"
+}
+
+variable "environment" {
+  type    = string
+  default = "dev"
 }
 
 variable "tags" {
-  type        = map(string)
-  description = "Tags to apply to ECR repository"
-  default     = {}
+  type = map(string)
+  default = {}
 }
