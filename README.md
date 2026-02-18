@@ -35,3 +35,35 @@ cd enterprise-observability-platform
 kubectl get pods -n observability
 kubectl port-forward svc/observability-api 8080:80
 curl http://localhost:8080/work  # Generates traces/logs/metrics
+
+Cleanup: cd infra && terraform destroy
+Structure
+￼
+Skills Demonstrated
+AWS Certified DevOps Pro Level:
+• EKS 1.29: Managed groups + IRSA for pod auth
+• Observability: ADOT Collector -> X-Ray/CloudWatch/OpenSearch
+• Security: Multi-AZ VPC, private subnets, least-privilege IAM
+• IaC: Modular Terraform + remote S3/DynamoDB backend
+• GitOps: ArgoCD-ready manifests
+Cost Breakdown (us-east-1, dev usage)
+￼
+Pro tip: Use Karpenter + Spot for 60% savings.
+Production Features
+• IRSA: Scoped IAM for FluentBit/ADOT
+• Multi-AZ: HA across 3 AZs
+• CI/CD Ready: GitHub Actions validation
+• Cost-Alerts: OpenCost + CloudWatch budgets
+Resources
+• Architecture
+• Runbooks
+• JD Mapping
+Portfolio
+• SuperBowlEdge-Chaos
+More @ccarrylab
+License
+MIT License
+Suggestions via Issues welcome.
+
+￼
+Built by Cohen H. Carryl | Sr Cloud Engineer | 3x AWS | Chaos Engineering Creator
