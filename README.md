@@ -1,5 +1,4 @@
-# Enterprise Observability Platform on AWS  *** (Work In Progress) ***
-
+# Enterprise Observability Platform on AWS  
 [![Terraform](https://img.shields.io/badge/Terraform-1.6+-623CE4?logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![AWS](https://img.shields.io/badge/AWS-EKS%20OpenSearch%20X--Ray-FF9900?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
